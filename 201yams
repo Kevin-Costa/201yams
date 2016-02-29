@@ -1,0 +1,266 @@
+#!/usr/bin/python
+
+import matplotlib.pyplot as plt
+import os, sys
+import re
+import math
+
+##########################################################################
+
+def bino(w, x):
+    result = (math.factorial(w) / (math.factorial(x) * math.factorial(w - x))) * (1.0/6.0)**x * (5.0/6.0)**(w - x)
+    return result
+
+def display(rito, wordtab, result, precision):
+    print('\033[34mProbabilite d\'obtenir ' + str(rito) + ' de '  + str(wordtab[1]) + ' : %.{0}f'.format(precision) % (result * 100) + '%\033[0m')
+
+def display2(wordtab, result, precision):
+    print('\033[34mProbabilite d\'obtenir un full de ' + str(wordtab[1]) + ' par les ' + str(wordtab[2]) + ' : %.{0}f'.format(precision) % (result * 100) + '%\033[0m')
+
+def calc(x, nb):
+    result = 0.0
+    rito = list_put.count(nb)
+    if x <= rito:
+        result = 1
+    else:
+        billy = x - rito
+        while (billy < 6 - rito):
+            result += bino(5 - rito, billy)
+            billy += 1
+    return result
+
+def print_error(string):
+    print('\033[31m' + string + '\033[0m')
+    sys.exit(1)
+
+##########################################################################
+
+def combi(error, wordtab):
+    billy = 1
+    zero = 0
+    high = 0
+    check = str(sys.argv[6])
+    while (billy < 6):
+        try:
+            int(sys.argv[billy])
+        except:
+            print_error('L\'argument numero ' + str(billy) + ' n\'est pas un chiffre')
+        if int(sys.argv[billy]) == 0:
+            zero += 1
+        if high < int(sys.argv[billy]):
+            high = int(sys.argv[billy])
+        if int(sys.argv[billy]) > 6 or int(sys.argv[billy]) < 0:
+            print('\033[31mle chiffre ' + sys.argv[billy] + ' est superieur a 6 ou inferieur a 0\033[0m')
+            sys.exit(1)
+        billy += 1
+    try:
+        int(wordtab[1])
+        if len(wordtab) == 3:
+            int(wordtab[2])
+    except:
+        print_error('Votre combinaison comporte des lettres a la place de chiffre!')
+    if zero != 0 and zero != 5:
+        print_error("Vos des doivent etre soit tous egaux a 0 soit tous different de 0")
+    elif check[0] == '_' or check[len(check)-1] == '_':
+        print_error("invalide \'_\'")
+    elif len(wordtab) < 2 or len(wordtab) > 3:
+        print_error("Votre combinaison doit avoir au minimum 1 chiffre et au maximum 2 chiffre")
+    elif wordtab[0] == "paire" and int(wordtab[1]) > 0 and int(wordtab[1]) <= 6 and len(wordtab) == 2:
+        error = 0
+    elif wordtab[0] == "yams" and int(wordtab[1]) > 0 and int(wordtab[1]) <= 6 and len(wordtab) == 2:
+        error = 0
+    elif wordtab[0] == "suite" and (int(wordtab[1]) == 5 or int(wordtab[1]) == 6) and len(wordtab) == 2:
+        error = 0
+    elif wordtab[0] == "carre" and int(wordtab[1]) > 0 and int(wordtab[1]) <= 6 and len(wordtab) == 2:
+        error = 0
+    elif wordtab[0] == "brelan" and int(wordtab[1]) > 0 and int(wordtab[1]) <= 6 and len(wordtab) == 2:
+        error = 0
+    elif wordtab[0] == "full" and len(wordtab) != 3:
+        print_error("la combinaison n'est pas complete")
+    elif wordtab[0] == "full" and int(wordtab[1]) > 0 and int(wordtab[1]) <= 6 and int(wordtab[2]) > 0 and int(wordtab[2]) <= 6 and len(wordtab) == 3:
+        error = 0
+    elif wordtab[0] == "full" and int(wordtab[1]) == int(wordtab[2]):
+        print_error("votre full ne peux pas posseder une paire et un brelan de meme chiffre")
+    elif wordtab[0] == "paire" and len(wordtab) != 2:
+        print_error("la combinaison est incorrect")
+    elif wordtab[0] == "yams" and len(wordtab) != 2:
+        print_error("la combinaison est incorrect")
+    elif wordtab[0] == "suite" and len(wordtab) != 2:
+        print_error("la combinaison est incorrect")
+    elif wordtab[0] == "carre" and len(wordtab) != 2:
+        print_error("la combinaison est incorrect")
+    elif wordtab[0] == "brelan" and len(wordtab) != 2:
+        print_error("la combinaison est incorrect")
+    else:
+        error = 1
+    if error == 1:
+        print_error('./201yams <nb> <nb> <nb> <nb> <nb> <option>')
+
+##########################################################################
+
+def paire(wordtab, precision):
+    billy = 0
+    i = 1
+    while (i < 6):
+        if (wordtab[1] == sys.argv[i]):
+            billy += 1
+        i += 1
+    if billy >= 2:
+        display('une paire', wordtab, 1, precision)
+    else:
+        display('une paire', wordtab, calc(2, int(wordtab[1])), precision)
+
+def brelan(wordtab, precision):
+    billy = 0
+    i = 1
+    while (i < 6):
+        if (wordtab[1] == sys.argv[i]):
+            billy += 1
+        i += 1
+    if (billy >= 3):
+        display('un brelan', wordtab, 1, precision)
+    else:
+        display('un brelan', wordtab, calc(3, int(wordtab[1])), precision)
+
+def carre(wordtab, precision):
+    billy = 0
+    i = 1
+    while (i < 6):
+        if (wordtab[1] == sys.argv[i]):
+            billy += 1
+        i += 1
+    if (billy >= 4):
+        display('un carre', wordtab, 1, precision)
+    else:
+        display('un carre', wordtab, calc(4, int(wordtab[1])), precision)
+
+def full(wordtab, precision):
+    i = 1
+    d2 = 2.0
+    d3 = 3.0
+    result = 0.0
+    while i < 6:
+        if int(sys.argv[i]) == int(wordtab[2]):
+            d2 -= 1
+        if d2 == 0:
+            break
+        i += 1
+    i = 1
+    while i < 6:
+        if int(sys.argv[i]) == int(wordtab[1]):
+            d3 -= 1
+        if d3 == 0:
+            break
+        i += 1
+    if d2 > d3:
+        result = math.factorial(5 - (2 - d2) - (3 - d3)) / (math.factorial(d2) * math.factorial(5 - (2 - d2) - (3 - d3) - d2))
+    else:
+        result = math.factorial(5 - (2 - d2) - (3 - d3)) / (math.factorial(d3) * math.factorial(5 - (2 - d2) - (3 - d3) - d3))
+    tmp = d2 + d3
+    while tmp > 0:
+        result = result * (1.0 / 6.0)
+        tmp -= 1
+    display2(wordtab, result, precision)
+
+def suite(wordtab, precision):
+    i = 1.0
+    count = 0.0
+    saleput = 6.0
+    if int(wordtab[1]) == 6:
+        i = 2
+        saleput = 7
+    while (i < saleput):
+        billy = 0
+        j = 1
+        while (j < 6):
+            if (int(sys.argv[j]) == i and billy == 0):
+                count += 1
+                billy = 1
+            j += 1
+        i += 1
+    if (count == 5):
+        display('une suite', wordtab, 1, precision)
+    else:
+        result = (1.0 / 6.0**(5.0 - count)) * math.factorial(5.0 - count)
+        display('une suite', wordtab, result, precision)
+
+def yams(wordtab, precision):
+    billy = 0
+    i = 1
+    while (i < 6):
+        if (wordtab[1] == sys.argv[i]):
+            billy += 1
+        i += 1
+    if (billy == 5):
+        display('un yams', wordtab, 1, precision)
+    else:
+        display('un yams', wordtab, calc(5, int(wordtab[1])), precision)
+
+##########################################################################
+
+if len (sys.argv) == 7:
+    tmp = 1
+    try:
+        wordtab = re.sub("_", " ", sys.argv[6]).split()
+    except:
+        print_error("Combinaison non valide")
+    combi(0, wordtab)
+    list_put = list()
+    while (tmp < 6):
+        if sys.argv[tmp].isdigit():
+            nb = int(sys.argv[tmp])
+            list_put.append(nb)
+        tmp += 1
+    if wordtab[0] == "paire":
+        paire(wordtab, 2)
+    elif wordtab[0] == "yams":
+        yams(wordtab, 2)
+    elif wordtab[0] == "carre":
+        carre(wordtab, 2)
+    elif wordtab[0] == "brelan":
+        brelan(wordtab, 2)
+    elif wordtab[0] == "suite":
+        suite(wordtab, 2)
+    elif wordtab[0] == "full":
+        full(wordtab, 2)
+
+elif len(sys.argv) == 8:
+    tmp = 1
+    try:
+        wordtab = re.sub("_", " ", sys.argv[6]).split()
+    except:
+        print_error("Combinaison non valide")
+    combi(0, wordtab)
+    try:
+       precision = int(sys.argv[7])
+    except:
+        print_error("La precision doit etre un chiffre")
+    if precision > 50:
+        print_error("Une precision superieur a 50 est inutile")
+    if precision < 0:
+        print_error("La precision ne peut pas etre negative")
+    list_put = list()
+    while (tmp < 6):
+        if sys.argv[tmp].isdigit():
+            nb = int(sys.argv[tmp])
+            list_put.append(nb)
+        tmp += 1
+    if wordtab[0] == "paire":
+        paire(wordtab, precision)
+    elif wordtab[0] == "yams":
+        yams(wordtab, precision)
+    elif wordtab[0] == "carre":
+        carre(wordtab, precision)
+    elif wordtab[0] == "brelan":
+        brelan(wordtab, precision)
+    elif wordtab[0] == "suite":
+        suite(wordtab, precision)
+    elif wordtab[0] == "full":
+        full(wordtab, precision)
+
+# multi joueur easy
+
+else:
+    print('\033[31m./201yams <nb> <nb> <nb> <nb> <nb> <option>\033[0m')
+    print_error('Bonus : ./201yams <nb> <nb> <nb> <nb> <nb> <option> <precision>')
+#    print_error('./201yams <nb> <nb> <nb> <nb> <nb> <option>')
